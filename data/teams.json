@@ -1,0 +1,122 @@
+{
+  "ATL": {
+    "salary": 181552551,
+    "tier": "over"
+  },
+  "BOS": {
+    "salary": 184262060,
+    "tier": "over"
+  },
+  "BRK": {
+    "salary": 153920855,
+    "tier": "under"
+  },
+  "CHO": {
+    "salary": 180097153,
+    "tier": "over"
+  },
+  "CHI": {
+    "salary": 175611954,
+    "tier": "over"
+  },
+  "CLE": {
+    "salary": 165910108,
+    "tier": "over"
+  },
+  "DAL": {
+    "salary": 180053039,
+    "tier": "over"
+  },
+  "DEN": {
+    "salary": 186075382,
+    "tier": "over"
+  },
+  "DET": {
+    "salary": 185911869,
+    "tier": "over"
+  },
+  "GSW": {
+    "salary": 204744987,
+    "tier": "first"
+  },
+  "HOU": {
+    "salary": 194689411,
+    "tier": "tax"
+  },
+  "IND": {
+    "salary": 186850540,
+    "tier": "over"
+  },
+  "LAC": {
+    "salary": 189377477,
+    "tier": "tax"
+  },
+  "LAL": {
+    "salary": 195297382,
+    "tier": "tax"
+  },
+  "MEM": {
+    "salary": 155114590,
+    "tier": "over"
+  },
+  "MIA": {
+    "salary": 186052117,
+    "tier": "over"
+  },
+  "MIL": {
+    "salary": 176165379,
+    "tier": "over"
+  },
+  "MIN": {
+    "salary": 193475172,
+    "tier": "tax"
+  },
+  "NOP": {
+    "salary": 187545829,
+    "tier": "over"
+  },
+  "NYK": {
+    "salary": 207454264,
+    "tier": "first"
+  },
+  "OKC": {
+    "salary": 186724316,
+    "tier": "over"
+  },
+  "ORL": {
+    "salary": 187342232,
+    "tier": "over"
+  },
+  "PHI": {
+    "salary": 191012951,
+    "tier": "tax"
+  },
+  "PHO": {
+    "salary": 186292926,
+    "tier": "over"
+  },
+  "POR": {
+    "salary": 183885939,
+    "tier": "over"
+  },
+  "SAC": {
+    "salary": 185955991,
+    "tier": "over"
+  },
+  "SAS": {
+    "salary": 179960669,
+    "tier": "over"
+  },
+  "TOR": {
+    "salary": 182388350,
+    "tier": "over"
+  },
+  "UTA": {
+    "salary": 168635700,
+    "tier": "over"
+  },
+  "WAS": {
+    "salary": 182053389,
+    "tier": "over"
+  }
+}
