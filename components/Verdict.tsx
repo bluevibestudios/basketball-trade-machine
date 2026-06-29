@@ -4,14 +4,17 @@ import type { TradeResult, TeamResult, Check } from '@/lib/engine';
 import { TEAM_BY_TRICODE } from '@/lib/teams';
 import { Logo, Money, cn } from './ui';
 
-export function Verdict({ result }: { result: TradeResult }) {
+// The headline status — rendered as a page-level sticky bar so it stays
+// visible while the user edits the trade below.
+export function StatusBanner({ result }: { result: TradeResult }) {
   if (result.empty) {
     return (
-      <div className="rounded-2xl border border-line bg-panel/70 p-6 text-center text-muted">
-        <div className="font-display text-2xl uppercase tracking-wide text-text">Build a trade</div>
-        <p className="mx-auto mt-1 max-w-sm text-sm">
-          Click players from each team’s roster to add them to the deal. The machine checks it against the full 2025-26 CBA in real time.
-        </p>
+      <div className="flex items-center gap-3 rounded-2xl border border-line bg-panel/90 p-3.5">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/15 text-xl text-accent">↔</div>
+        <div>
+          <div className="font-display text-xl uppercase tracking-wide text-text">Build a trade</div>
+          <div className="text-xs text-muted">Tap players, picks, or cash to add them — checked against the 2025-26 CBA live.</div>
+        </div>
       </div>
     );
   }
@@ -20,25 +23,28 @@ export function Verdict({ result }: { result: TradeResult }) {
   const errorCount = result.teams.reduce((n, t) => n + t.checks.filter((c) => c.severity === 'error' && !c.ok).length, 0);
 
   return (
-    <div className="space-y-3">
-      <div className={cn('rounded-2xl border bg-panel/80 p-4', legal ? 'border-emerald-500/40 glow-ok' : 'border-rose-500/40 glow-bad')}>
-        <div className="flex items-center gap-3">
-          <div className={cn('flex h-11 w-11 items-center justify-center rounded-full text-2xl', legal ? 'bg-emerald-500/15 text-emerald-300' : 'bg-rose-500/15 text-rose-300')}>
-            {legal ? '✓' : '✕'}
-          </div>
-          <div>
-            <div className={cn('font-display text-xl uppercase tracking-wide', legal ? 'text-emerald-300' : 'text-rose-300')}>
-              {legal ? 'Trade is legal' : 'Trade is not allowed'}
-            </div>
-            <div className="text-xs text-muted">
-              {legal
-                ? 'Satisfies salary matching, apron, and roster rules for every team.'
-                : `${errorCount} rule${errorCount === 1 ? '' : 's'} violated — see the flagged team${errorCount === 1 ? '' : 's'} below.`}
-            </div>
-          </div>
+    <div className={cn('flex items-center gap-3 rounded-2xl border bg-panel/90 p-3.5', legal ? 'border-emerald-500/40 glow-ok' : 'border-rose-500/40 glow-bad')}>
+      <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-2xl', legal ? 'bg-emerald-500/15 text-emerald-300' : 'bg-rose-500/15 text-rose-300')}>
+        {legal ? '✓' : '✕'}
+      </div>
+      <div>
+        <div className={cn('font-display text-xl uppercase tracking-wide', legal ? 'text-emerald-300' : 'text-rose-300')}>
+          {legal ? 'Trade is legal' : 'Trade is not allowed'}
+        </div>
+        <div className="text-xs text-muted">
+          {legal
+            ? 'Satisfies salary matching, apron, and roster rules for every team.'
+            : `${errorCount} rule${errorCount === 1 ? '' : 's'} violated — see the flagged team${errorCount === 1 ? '' : 's'} below.`}
         </div>
       </div>
+    </div>
+  );
+}
 
+export function Verdict({ result }: { result: TradeResult }) {
+  if (result.empty) return null;
+  return (
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {result.teams.map((t) => (
         <TeamVerdict key={t.tricode} t={t} />
       ))}

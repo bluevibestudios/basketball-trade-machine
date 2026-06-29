@@ -7,9 +7,8 @@ import { CAP, fmtShort } from '@/lib/cba';
 import { evaluateTrade, type Movements } from '@/lib/engine';
 import { encodeTrade, decodeTrade } from '@/lib/share';
 import { TeamColumn } from './TeamColumn';
-import { Verdict } from './Verdict';
-
-const DEFAULT_TEAMS = ['LAL', 'GSW'];
+import { Verdict, StatusBanner } from './Verdict';
+import { HomeScreen } from './HomeScreen';
 
 export function TradeMachine({
   players,
@@ -20,7 +19,7 @@ export function TradeMachine({
   finance: Record<string, TeamFinance>;
   rosterCounts: Record<string, number>;
 }) {
-  const [selectedTeams, setSelectedTeams] = useState<string[]>(DEFAULT_TEAMS);
+  const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [movements, setMovements] = useState<Movements>({});
   const [extras, setExtras] = useState<Extra[]>([]);
   const [copied, setCopied] = useState(false);
@@ -136,6 +135,7 @@ export function TradeMachine({
   );
 
   const reset = useCallback(() => { setMovements({}); setExtras([]); }, []);
+  const goHome = useCallback(() => { setSelectedTeams([]); setMovements({}); setExtras([]); }, []);
   const dealSize = Object.keys(movements).length + extras.length;
 
   // Hydrate from a shared ?t= link on mount.
@@ -171,6 +171,11 @@ export function TradeMachine({
     }
   }, []);
 
+  // Start on the team-selection home screen until the user picks teams.
+  if (selectedTeams.length === 0) {
+    return <HomeScreen onStart={(teams) => setSelectedTeams(teams)} />;
+  }
+
   return (
     <div className="mx-auto max-w-[1500px] px-4 py-4">
       {/* Header */}
@@ -194,6 +199,9 @@ export function TradeMachine({
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          <button onClick={goHome} className="rounded-lg border border-line bg-panel px-3 py-1.5 text-sm text-muted hover:text-text" title="Back to team selection">
+            ⌂ Teams
+          </button>
           {dealSize > 0 && (
             <button onClick={reset} data-reset className="rounded-lg border border-line bg-panel px-3 py-1.5 text-sm text-muted hover:text-text">
               Reset deal
@@ -217,10 +225,19 @@ export function TradeMachine({
         </div>
       </header>
 
-      {/* Body */}
-      <div className="flex flex-col gap-4 xl:flex-row">
-        <div className="scroll-thin flex flex-1 gap-3 overflow-x-auto pb-3">
-          {selectedTeams.map((tri, i) => {
+      {/* Status — page-level sticky bar, always visible while editing below */}
+      <div className="sticky top-0 z-30 -mx-4 mb-3 bg-bg/85 px-4 py-2 backdrop-blur">
+        <StatusBanner result={result} />
+      </div>
+
+      {/* Per-team verdict detail */}
+      <div className="mb-4">
+        <Verdict result={result} />
+      </div>
+
+      {/* Team columns */}
+      <div className="scroll-thin flex gap-3 overflow-x-auto pb-3">
+        {selectedTeams.map((tri, i) => {
             const team = TEAM_BY_TRICODE[tri];
             const outgoing = Object.entries(movements)
               .map(([id, to]) => ({ player: playerById.get(id)!, to }))
@@ -255,13 +272,6 @@ export function TradeMachine({
               />
             );
           })}
-        </div>
-
-        <aside className="xl:w-[400px] xl:shrink-0">
-          <div className="xl:sticky xl:top-4">
-            <Verdict result={result} />
-          </div>
-        </aside>
       </div>
     </div>
   );
