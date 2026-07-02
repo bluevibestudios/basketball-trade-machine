@@ -8,10 +8,12 @@ export function HomeScreen({
   onStart,
   maxTeams = 4,
   onLimit,
+  updatedAt,
 }: {
   onStart: (teams: string[]) => void;
   maxTeams?: number;
   onLimit?: () => void;
+  updatedAt?: string;
 }) {
   const [picked, setPicked] = useState<string[]>([]);
   // Ref mirror so rapid taps can't race past the team cap via stale closures.
@@ -87,6 +89,12 @@ export function HomeScreen({
         <p className="mt-2 max-w-md text-sm text-muted">
           Build a trade and check it instantly against the real 2025-26 salary cap, aprons, and CBA rules.
         </p>
+        {updatedAt && (
+          <p className="mt-1.5 font-condensed text-[11px] uppercase tracking-[0.18em] text-muted/70" data-freshness>
+            Rosters updated{' '}
+            {new Date(updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          </p>
+        )}
       </div>
 
       <div className="mt-8 flex items-end justify-between">

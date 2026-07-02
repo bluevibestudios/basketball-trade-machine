@@ -1,13 +1,15 @@
 'use client';
 
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
-import type { Player, TeamFinance, Extra } from '@/lib/types';
+import type { Player, Extra } from '@/lib/types';
 import { TEAMS, TEAM_BY_TRICODE } from '@/lib/teams';
 import { CAP, fmtShort } from '@/lib/cba';
 import { evaluateTrade, type Movements } from '@/lib/engine';
 import { encodeTrade, decodeTrade } from '@/lib/share';
 import { loadPro } from '@/lib/pro';
 import { shareTradeCard } from '@/lib/shareCard';
+import { computeFinance } from '@/lib/finance';
+import { useLiveData, type DataMeta } from '@/lib/liveData';
 import { TeamColumn } from './TeamColumn';
 import { Verdict, StatusBanner } from './Verdict';
 import { HomeScreen } from './HomeScreen';
@@ -15,14 +17,13 @@ import { ProSheet } from './ProSheet';
 import { CapOutlook } from './CapOutlook';
 
 export function TradeMachine({
-  players,
-  finance,
-  rosterCounts,
+  initialPlayers,
+  meta,
 }: {
-  players: Player[];
-  finance: Record<string, TeamFinance>;
-  rosterCounts: Record<string, number>;
+  initialPlayers: Player[];
+  meta: DataMeta;
 }) {
+  const { players, updatedAt } = useLiveData(initialPlayers, meta);
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [movements, setMovements] = useState<Movements>({});
   const [extras, setExtras] = useState<Extra[]>([]);
@@ -45,6 +46,7 @@ export function TradeMachine({
     return m;
   }, [players]);
 
+  const { finance, rosterCounts } = useMemo(() => computeFinance(players), [players]);
   const teamSalaries = useMemo(
     () => Object.fromEntries(Object.entries(finance).map(([t, f]) => [t, f.salary])),
     [finance],
@@ -206,6 +208,7 @@ export function TradeMachine({
           onStart={(teams) => setSelectedTeams(teams)}
           maxTeams={isPro ? 4 : 2}
           onLimit={() => setShowPro(true)}
+          updatedAt={updatedAt}
         />
         {proSheet}
       </>
