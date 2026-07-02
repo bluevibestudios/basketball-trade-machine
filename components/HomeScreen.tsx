@@ -1,14 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { TEAMS, type Team } from '@/lib/teams';
 import { Logo, cn } from './ui';
 
-export function HomeScreen({ onStart }: { onStart: (teams: string[]) => void }) {
+export function HomeScreen({
+  onStart,
+  maxTeams = 4,
+  onLimit,
+}: {
+  onStart: (teams: string[]) => void;
+  maxTeams?: number;
+  onLimit?: () => void;
+}) {
   const [picked, setPicked] = useState<string[]>([]);
+  // Ref mirror so rapid taps can't race past the team cap via stale closures.
+  const pickedRef = useRef<string[]>([]);
 
-  const toggle = (tri: string) =>
-    setPicked((p) => (p.includes(tri) ? p.filter((t) => t !== tri) : p.length >= 4 ? p : [...p, tri]));
+  const toggle = (tri: string) => {
+    const p = pickedRef.current;
+    let next: string[];
+    if (p.includes(tri)) {
+      next = p.filter((t) => t !== tri);
+    } else if (p.length >= maxTeams) {
+      onLimit?.(); // free tier: adding a 3rd team opens the Pro sheet
+      return;
+    } else {
+      next = [...p, tri];
+    }
+    pickedRef.current = next;
+    setPicked(next);
+  };
 
   const byCity = (a: Team, b: Team) => a.city.localeCompare(b.city);
   const west = TEAMS.filter((t) => t.conference === 'West').sort(byCity);
@@ -20,12 +42,13 @@ export function HomeScreen({ onStart }: { onStart: (teams: string[]) => void }) 
     return (
       <button
         onClick={() => toggle(t.tricode)}
-        disabled={!sel && picked.length >= 4}
         className={cn(
           'relative flex items-center gap-2 rounded-xl border px-2.5 py-2 text-left transition',
           sel
             ? 'border-accent bg-accent/10'
-            : 'border-line bg-panel/60 hover:bg-panel2 disabled:cursor-not-allowed disabled:opacity-35',
+            : picked.length >= maxTeams
+              ? 'border-line bg-panel/60 opacity-45 hover:opacity-70'
+              : 'border-line bg-panel/60 hover:bg-panel2',
         )}
       >
         <Logo tricode={t.tricode} size={30} />
@@ -68,7 +91,9 @@ export function HomeScreen({ onStart }: { onStart: (teams: string[]) => void }) 
 
       <div className="mt-8 flex items-end justify-between">
         <h2 className="font-condensed text-base font-semibold uppercase tracking-[0.16em]">Choose teams</h2>
-        <span className="text-xs text-muted">{picked.length}/4 · pick 2–4</span>
+        <span className="text-xs text-muted">
+          {picked.length}/{maxTeams} · {maxTeams === 2 ? 'pick 2 (3–4 with Pro)' : 'pick 2–4'}
+        </span>
       </div>
 
       <div className="mt-3 grid gap-6 lg:grid-cols-2">

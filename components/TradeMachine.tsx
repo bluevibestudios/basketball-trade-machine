@@ -6,9 +6,12 @@ import { TEAMS, TEAM_BY_TRICODE } from '@/lib/teams';
 import { CAP, fmtShort } from '@/lib/cba';
 import { evaluateTrade, type Movements } from '@/lib/engine';
 import { encodeTrade, decodeTrade } from '@/lib/share';
+import { loadPro } from '@/lib/pro';
+import { shareTradeCard } from '@/lib/shareCard';
 import { TeamColumn } from './TeamColumn';
 import { Verdict, StatusBanner } from './Verdict';
 import { HomeScreen } from './HomeScreen';
+import { ProSheet } from './ProSheet';
 
 export function TradeMachine({
   players,
@@ -23,6 +26,9 @@ export function TradeMachine({
   const [movements, setMovements] = useState<Movements>({});
   const [extras, setExtras] = useState<Extra[]>([]);
   const [copied, setCopied] = useState(false);
+  const [isPro, setIsPro] = useState(false);
+  const [showPro, setShowPro] = useState(false);
+  const [shared, setShared] = useState<string | null>(null);
   const extraSeq = useRef(0);
   const hydrated = useRef(false);
 
@@ -68,6 +74,7 @@ export function TradeMachine({
 
   const addExtra = useCallback(
     (kind: 'pick' | 'cash', from: string) => {
+      if (kind === 'pick' && !isPro) { setShowPro(true); return; } // Pro: draft-pick trading
       const to = nextTeam(from);
       const id = `e${extraSeq.current++}`;
       const base: Extra =
@@ -76,7 +83,7 @@ export function TradeMachine({
           : { id, kind, from, to, year: 2027, round: 1 };
       setExtras((a) => [...a, base]);
     },
-    [nextTeam],
+    [nextTeam, isPro],
   );
   const updateExtra = useCallback(
     (id: string, patch: Partial<Extra>) => setExtras((a) => a.map((x) => (x.id === id ? { ...x, ...patch } : x))),
@@ -110,12 +117,13 @@ export function TradeMachine({
   );
 
   const addTeam = useCallback(() => {
+    if (!isPro && selectedTeams.length >= 2) { setShowPro(true); return; } // Pro: 3-4 team trades
     setSelectedTeams((prev) => {
       if (prev.length >= 4) return prev;
       const avail = TEAMS.find((t) => !prev.includes(t.tricode));
       return avail ? [...prev, avail.tricode] : prev;
     });
-  }, []);
+  }, [isPro, selectedTeams.length]);
 
   const removeTeam = useCallback(
     (tri: string) => {
@@ -140,6 +148,7 @@ export function TradeMachine({
 
   // Hydrate from a shared ?t= link on mount.
   useEffect(() => {
+    setIsPro(loadPro());
     const token = new URLSearchParams(window.location.search).get('t');
     if (token) {
       const st = decodeTrade(token);
@@ -171,9 +180,34 @@ export function TradeMachine({
     }
   }, []);
 
+  const shareGraphic = useCallback(async () => {
+    if (!isPro) { setShowPro(true); return; } // Pro: share trade graphics
+    try {
+      const how = await shareTradeCard(result);
+      setShared(how === 'shared' ? '✓ Shared' : '✓ Saved');
+      setTimeout(() => setShared(null), 1600);
+    } catch {
+      setShared('Share failed');
+      setTimeout(() => setShared(null), 1600);
+    }
+  }, [isPro, result]);
+
+  const proSheet = (
+    <ProSheet open={showPro} onClose={() => setShowPro(false)} onUnlocked={() => setIsPro(true)} />
+  );
+
   // Start on the team-selection home screen until the user picks teams.
   if (selectedTeams.length === 0) {
-    return <HomeScreen onStart={(teams) => setSelectedTeams(teams)} />;
+    return (
+      <>
+        <HomeScreen
+          onStart={(teams) => setSelectedTeams(teams)}
+          maxTeams={isPro ? 4 : 2}
+          onLimit={() => setShowPro(true)}
+        />
+        {proSheet}
+      </>
+    );
   }
 
   return (
@@ -215,12 +249,21 @@ export function TradeMachine({
               {copied ? '✓ Copied' : '🔗 Copy link'}
             </button>
           )}
+          {dealSize > 0 && (
+            <button
+              onClick={shareGraphic}
+              data-share
+              className="rounded-lg border border-line bg-panel px-3 py-1.5 text-sm font-medium text-text hover:bg-panel2"
+            >
+              {shared ?? <>📸 Share graphic{!isPro && <ProChip />}</>}
+            </button>
+          )}
           <button
             onClick={addTeam}
             disabled={selectedTeams.length >= 4}
             className="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1.5 text-sm font-semibold text-accent hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            + Add team
+            + Add team{!isPro && selectedTeams.length >= 2 && <ProChip />}
           </button>
         </div>
       </header>
@@ -232,7 +275,7 @@ export function TradeMachine({
 
       {/* Per-team verdict detail */}
       <div className="mb-4">
-        <Verdict result={result} />
+        <Verdict result={result} isPro={isPro} onUpsell={() => setShowPro(true)} />
       </div>
 
       {/* Team columns */}
@@ -273,7 +316,16 @@ export function TradeMachine({
             );
           })}
       </div>
+      {proSheet}
     </div>
+  );
+}
+
+function ProChip() {
+  return (
+    <span className="ml-1.5 rounded bg-accent/20 px-1 py-0.5 align-middle text-[9px] font-bold uppercase tracking-wide text-accent">
+      Pro
+    </span>
   );
 }
 

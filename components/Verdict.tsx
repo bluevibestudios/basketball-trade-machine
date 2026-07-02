@@ -41,18 +41,26 @@ export function StatusBanner({ result }: { result: TradeResult }) {
   );
 }
 
-export function Verdict({ result }: { result: TradeResult }) {
+export function Verdict({
+  result,
+  isPro = true,
+  onUpsell,
+}: {
+  result: TradeResult;
+  isPro?: boolean;
+  onUpsell?: () => void;
+}) {
   if (result.empty) return null;
   return (
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {result.teams.map((t) => (
-        <TeamVerdict key={t.tricode} t={t} />
+        <TeamVerdict key={t.tricode} t={t} isPro={isPro} onUpsell={onUpsell} />
       ))}
     </div>
   );
 }
 
-function TeamVerdict({ t }: { t: TeamResult }) {
+function TeamVerdict({ t, isPro, onUpsell }: { t: TeamResult; isPro: boolean; onUpsell?: () => void }) {
   const team = TEAM_BY_TRICODE[t.tricode];
   const denom = Math.max(t.incoming, t.maxAllowedIncoming, 1);
   const allowedPct = (t.maxAllowedIncoming / denom) * 100;
@@ -88,11 +96,33 @@ function TeamVerdict({ t }: { t: TeamResult }) {
       </div>
 
       <ul className="space-y-1.5">
-        {t.checks.map((c, i) => (
-          <CheckRow key={i} c={c} />
-        ))}
+        {t.checks.map((c, i) =>
+          // Free tier gets the salary-matching verdict in full; the deeper
+          // apron/hard-cap/tax explanations are Pro (PAID-APP-STRATEGY.md).
+          isPro || c.label === 'Salary matching' ? (
+            <CheckRow key={i} c={c} />
+          ) : (
+            <LockedCheckRow key={i} c={c} onUpsell={onUpsell} />
+          ),
+        )}
       </ul>
     </div>
+  );
+}
+
+function LockedCheckRow({ c, onUpsell }: { c: Check; onUpsell?: () => void }) {
+  const icon = c.severity === 'info' ? 'ℹ' : c.ok ? '✓' : c.severity === 'warn' ? '⚠' : '✕';
+  const color = c.severity === 'info' ? 'text-sky-300' : c.ok ? 'text-emerald-300' : c.severity === 'warn' ? 'text-amber-300' : 'text-rose-300';
+  return (
+    <li className="flex gap-2 text-[12px] leading-snug">
+      <span className={cn('mt-0.5 shrink-0 font-bold', color)}>{icon}</span>
+      <button onClick={onUpsell} className="text-left">
+        <span className="font-semibold text-text">{c.label}.</span>{' '}
+        <span className="text-muted underline decoration-dotted underline-offset-2">
+          🔒 Full explanation with <span className="font-semibold text-accent">Pro</span>
+        </span>
+      </button>
+    </li>
   );
 }
 
