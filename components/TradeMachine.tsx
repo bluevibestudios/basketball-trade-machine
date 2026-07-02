@@ -147,8 +147,27 @@ export function TradeMachine({
   );
 
   const reset = useCallback(() => { setMovements({}); setExtras([]); }, []);
-  const goHome = useCallback(() => { setSelectedTeams([]); setMovements({}); setExtras([]); }, []);
+  const goHome = useCallback(() => {
+    setSelectedTeams([]); setMovements({}); setExtras([]);
+    window.scrollTo(0, 0);
+  }, []);
+  const startTrade = useCallback((teams: string[]) => {
+    setSelectedTeams(teams);
+    window.scrollTo(0, 0); // the home screen may be scrolled deep into the team grid
+  }, []);
   const dealSize = Object.keys(movements).length + extras.length;
+
+  // A verdict is only meaningful once every team in the deal is sending
+  // something out — until then the trade is under construction, not illegal.
+  const pendingTeams = useMemo(() => {
+    if (dealSize === 0) return [];
+    return selectedTeams.filter(
+      (tri) =>
+        !Object.keys(movements).some((id) => playerById.get(id)?.team === tri) &&
+        !extras.some((e) => e.from === tri && e.from !== e.to),
+    );
+  }, [dealSize, selectedTeams, movements, extras, playerById]);
+  const verdictReady = dealSize > 0 && pendingTeams.length === 0;
 
   // Hydrate from a shared ?t= link on mount.
   useEffect(() => {
@@ -205,7 +224,7 @@ export function TradeMachine({
     return (
       <>
         <HomeScreen
-          onStart={(teams) => setSelectedTeams(teams)}
+          onStart={startTrade}
           maxTeams={isPro ? 4 : 2}
           onLimit={() => setShowPro(true)}
           updatedAt={updatedAt}
@@ -237,19 +256,19 @@ export function TradeMachine({
           <Legend label="2nd apron" value={CAP.secondApron} dot="bg-rose-400" />
         </div>
 
-        <div className="ml-auto flex items-center gap-2">
-          <button onClick={goHome} className="rounded-lg border border-line bg-panel px-3 py-1.5 text-sm text-muted hover:text-text" title="Back to team selection">
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+          <button onClick={goHome} className="whitespace-nowrap rounded-lg border border-line bg-panel px-3 py-1.5 text-sm leading-5 text-muted hover:text-text" title="Back to team selection">
             ⌂ Teams
           </button>
           {dealSize > 0 && (
-            <button onClick={reset} data-reset className="rounded-lg border border-line bg-panel px-3 py-1.5 text-sm text-muted hover:text-text">
+            <button onClick={reset} data-reset className="whitespace-nowrap rounded-lg border border-line bg-panel px-3 py-1.5 text-sm leading-5 text-muted hover:text-text">
               Reset deal
             </button>
           )}
           {dealSize > 0 && (
             <button
               onClick={copyLink}
-              className="rounded-lg border border-line bg-panel px-3 py-1.5 text-sm font-medium text-text hover:bg-panel2"
+              className="whitespace-nowrap rounded-lg border border-line bg-panel px-3 py-1.5 text-sm font-medium leading-5 text-text hover:bg-panel2"
             >
               {copied ? '✓ Copied' : '🔗 Copy link'}
             </button>
@@ -258,7 +277,7 @@ export function TradeMachine({
             <button
               onClick={shareGraphic}
               data-share
-              className="rounded-lg border border-line bg-panel px-3 py-1.5 text-sm font-medium text-text hover:bg-panel2"
+              className="whitespace-nowrap rounded-lg border border-line bg-panel px-3 py-1.5 text-sm font-medium leading-5 text-text hover:bg-panel2"
             >
               {shared ?? <>📸 Share graphic{!isPro && <ProChip />}</>}
             </button>
@@ -266,7 +285,7 @@ export function TradeMachine({
           <button
             onClick={addTeam}
             disabled={selectedTeams.length >= 4}
-            className="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1.5 text-sm font-semibold text-accent hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-40"
+            className="whitespace-nowrap rounded-lg border border-accent/40 bg-accent/10 px-3 py-1.5 text-sm font-semibold leading-5 text-accent hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-40"
           >
             + Add team{!isPro && selectedTeams.length >= 2 && <ProChip />}
           </button>
@@ -275,13 +294,15 @@ export function TradeMachine({
 
       {/* Status — page-level sticky bar, always visible while editing below */}
       <div className="sticky top-0 z-30 -mx-4 mb-3 bg-bg/85 px-4 py-2 backdrop-blur">
-        <StatusBanner result={result} />
+        <StatusBanner result={result} pendingTeams={pendingTeams} />
       </div>
 
-      {/* Per-team verdict detail */}
-      <div className="mb-4">
-        <Verdict result={result} isPro={isPro} onUpsell={() => setShowPro(true)} />
-      </div>
+      {/* Per-team verdict detail — only once the deal is judgeable */}
+      {verdictReady && (
+        <div className="mb-4">
+          <Verdict result={result} isPro={isPro} onUpsell={() => setShowPro(true)} />
+        </div>
+      )}
 
       {/* Team columns */}
       <div className="scroll-thin flex gap-3 overflow-x-auto pb-3">

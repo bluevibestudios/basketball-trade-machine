@@ -6,7 +6,7 @@ import { Logo, Money, cn } from './ui';
 
 // The headline status — rendered as a page-level sticky bar so it stays
 // visible while the user edits the trade below.
-export function StatusBanner({ result }: { result: TradeResult }) {
+export function StatusBanner({ result, pendingTeams = [] }: { result: TradeResult; pendingTeams?: string[] }) {
   if (result.empty) {
     return (
       <div className="flex items-center gap-3 rounded-2xl border border-line bg-panel/90 p-3.5">
@@ -14,6 +14,22 @@ export function StatusBanner({ result }: { result: TradeResult }) {
         <div>
           <div className="font-display text-xl uppercase tracking-wide text-text">Build a trade</div>
           <div className="text-xs text-muted">Tap players, picks, or cash to add them — checked against the 2025-26 CBA live.</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Under construction: don't rule on a half-built deal.
+  if (pendingTeams.length > 0) {
+    return (
+      <div className="flex items-center gap-3 rounded-2xl border border-amber-500/40 bg-panel/90 p-3.5">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-xl text-amber-300">⋯</div>
+        <div>
+          <div className="font-display text-xl uppercase tracking-wide text-amber-300">Deal in progress</div>
+          <div className="text-xs text-muted">
+            Waiting on outgoing assets from <span className="font-semibold text-text">{pendingTeams.join(', ')}</span> —
+            every team must send a player, pick, or cash.
+          </div>
         </div>
       </div>
     );

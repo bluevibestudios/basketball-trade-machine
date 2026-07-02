@@ -24,6 +24,9 @@
 }
 
 html, body {
+  /* `clip` (not `hidden`) kills sideways panning without creating a scroll
+     container, which would break position: sticky. */
+  overflow-x: clip;
   background:
     radial-gradient(1100px 640px at 78% -12%, rgba(248, 107, 30, 0.16), transparent 60%),
     radial-gradient(820px 520px at 4% 2%, rgba(248, 107, 30, 0.06), transparent 55%),
