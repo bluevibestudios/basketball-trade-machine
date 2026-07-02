@@ -11,7 +11,6 @@ export interface Player {
   guaranteedRemaining: number;
   twoWay: boolean;
   deadMoney: boolean;
-  headshot: string;
 }
 
 export interface TeamFinance {

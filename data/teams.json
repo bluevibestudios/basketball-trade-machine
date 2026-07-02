@@ -1,30 +1,30 @@
 {
   "ATL": {
-    "salary": 181552551,
+    "salary": 185822722,
     "tier": "over"
   },
   "BOS": {
-    "salary": 184262060,
-    "tier": "over"
+    "salary": 188833315,
+    "tier": "tax"
   },
   "BRK": {
     "salary": 153920855,
     "tier": "under"
   },
   "CHO": {
-    "salary": 180097153,
+    "salary": 182367888,
     "tier": "over"
   },
   "CHI": {
-    "salary": 175611954,
+    "salary": 182833631,
     "tier": "over"
   },
   "CLE": {
-    "salary": 165910108,
-    "tier": "over"
+    "salary": 211979654,
+    "tier": "second"
   },
   "DAL": {
-    "salary": 180053039,
+    "salary": 182323774,
     "tier": "over"
   },
   "DEN": {
@@ -56,7 +56,7 @@
     "tier": "tax"
   },
   "MEM": {
-    "salary": 155114590,
+    "salary": 156075343,
     "tier": "over"
   },
   "MIA": {
@@ -64,7 +64,7 @@
     "tier": "over"
   },
   "MIL": {
-    "salary": 176165379,
+    "salary": 178387056,
     "tier": "over"
   },
   "MIN": {
@@ -88,7 +88,7 @@
     "tier": "over"
   },
   "PHI": {
-    "salary": 191012951,
+    "salary": 192968328,
     "tier": "tax"
   },
   "PHO": {
@@ -96,27 +96,27 @@
     "tier": "over"
   },
   "POR": {
-    "salary": 183885939,
+    "salary": 186235517,
     "tier": "over"
   },
   "SAC": {
-    "salary": 185955991,
+    "salary": 186664589,
     "tier": "over"
   },
   "SAS": {
-    "salary": 179960669,
+    "salary": 182960669,
     "tier": "over"
   },
   "TOR": {
-    "salary": 182388350,
+    "salary": 186565404,
     "tier": "over"
   },
   "UTA": {
-    "salary": 168635700,
+    "salary": 172310700,
     "tier": "over"
   },
   "WAS": {
-    "salary": 182053389,
+    "salary": 186042502,
     "tier": "over"
   }
 }
