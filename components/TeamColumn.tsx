@@ -46,6 +46,8 @@ export function TeamColumn({
   onRemoveExtra,
   onChangeTeam,
   onRemoveTeam,
+  onCapOutlook,
+  outlookLocked,
 }: {
   team: Team;
   finance: { salary: number; tier: string };
@@ -65,6 +67,8 @@ export function TeamColumn({
   onRemoveExtra: (id: string) => void;
   onChangeTeam: (tri: string) => void;
   onRemoveTeam: () => void;
+  onCapOutlook: () => void;
+  outlookLocked: boolean;
 }) {
   const [q, setQ] = useState('');
   const movedIds = useMemo(() => new Set(outgoing.map((o) => o.player.id)), [outgoing]);
@@ -124,6 +128,16 @@ export function TeamColumn({
             was <Money value={finance.salary} short /> · roster {result.rosterCount}/15
           </div>
         )}
+        <button
+          onClick={onCapOutlook}
+          data-cap-outlook-btn={team.tricode}
+          className="mt-2 w-full rounded-lg border border-line bg-panel/70 px-2 py-1.5 text-xs font-medium text-muted hover:text-text"
+        >
+          📅 Cap outlook
+          {outlookLocked && (
+            <span className="ml-1.5 rounded bg-accent/20 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide text-accent">Pro</span>
+          )}
+        </button>
       </div>
 
       {/* Trade block */}

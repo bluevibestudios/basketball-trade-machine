@@ -12,6 +12,7 @@ import { TeamColumn } from './TeamColumn';
 import { Verdict, StatusBanner } from './Verdict';
 import { HomeScreen } from './HomeScreen';
 import { ProSheet } from './ProSheet';
+import { CapOutlook } from './CapOutlook';
 
 export function TradeMachine({
   players,
@@ -29,6 +30,7 @@ export function TradeMachine({
   const [isPro, setIsPro] = useState(false);
   const [showPro, setShowPro] = useState(false);
   const [shared, setShared] = useState<string | null>(null);
+  const [outlookTeam, setOutlookTeam] = useState<string | null>(null);
   const extraSeq = useRef(0);
   const hydrated = useRef(false);
 
@@ -312,10 +314,15 @@ export function TradeMachine({
                 onRemoveExtra={removeExtra}
                 onChangeTeam={(t) => changeTeam(i, t)}
                 onRemoveTeam={() => removeTeam(tri)}
+                onCapOutlook={() => (isPro ? setOutlookTeam(tri) : setShowPro(true))}
+                outlookLocked={!isPro}
               />
             );
           })}
       </div>
+      {outlookTeam && (
+        <CapOutlook tricode={outlookTeam} players={players} movements={movements} onClose={() => setOutlookTeam(null)} />
+      )}
       {proSheet}
     </div>
   );
