@@ -17,7 +17,8 @@ import { useEffect, useState } from 'react';
 import type { Player } from './types';
 
 const CACHE_KEY = 'btm_data_v1';
-const ENV_URL = process.env.NEXT_PUBLIC_DATA_URL || null;
+const DEFAULT_URL = 'https://raw.githubusercontent.com/bluevibestudios/basketball-trade-machine/main/data';
+const ENV_URL = process.env.NEXT_PUBLIC_DATA_URL || DEFAULT_URL;
 
 export interface DataMeta {
   season: string;
