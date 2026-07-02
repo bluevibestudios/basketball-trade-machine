@@ -11,3 +11,7 @@ capacitor-cordova-ios-plugins
 # Generated Config files
 App/App/capacitor.config.json
 App/App/config.xml
+
+# macOS/Xcode duplicate artifacts (created when Xcode is open during cap sync)
+* 2.xml
+* 2.json
