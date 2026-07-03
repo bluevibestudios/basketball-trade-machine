@@ -171,10 +171,15 @@ export function TradeMachine({
 
   // Hydrate from a shared ?t= link on mount.
   useEffect(() => {
-    setIsPro(loadPro());
+    const stored = loadPro();
+    setIsPro(stored);
+    console.log(`[pro] local flag: ${stored}`);
     // On iOS, ask StoreKit whether this Apple account owns Pro (covers
     // reinstalls/new devices without an explicit Restore tap).
-    syncEntitlement().then((owned) => owned && setIsPro(true));
+    syncEntitlement().then((owned) => {
+      console.log(`[pro] StoreKit entitlement: ${owned}`);
+      if (owned) setIsPro(true);
+    });
     const token = new URLSearchParams(window.location.search).get('t');
     if (token) {
       const st = decodeTrade(token);
