@@ -218,8 +218,10 @@ export function TradeMachine({
     }
   }, [isPro, result]);
 
+  // Never show the purchase sheet to someone who already owns Pro, no matter
+  // which gate tried to open it.
   const proSheet = (
-    <ProSheet open={showPro} onClose={() => setShowPro(false)} onUnlocked={() => setIsPro(true)} />
+    <ProSheet open={showPro && !isPro} onClose={() => setShowPro(false)} onUnlocked={() => setIsPro(true)} />
   );
 
   // Start on the team-selection home screen until the user picks teams.
@@ -229,7 +231,9 @@ export function TradeMachine({
         <HomeScreen
           onStart={startTrade}
           maxTeams={isPro ? 4 : 2}
-          onLimit={() => setShowPro(true)}
+          // Free users hitting the 2-team cap get the upsell; Pro users at the
+          // hard 4-team cap just stop — never sell someone what they own.
+          onLimit={() => { if (!isPro) setShowPro(true); }}
           updatedAt={updatedAt}
         />
         {proSheet}
