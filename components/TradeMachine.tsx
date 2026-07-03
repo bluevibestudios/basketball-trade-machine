@@ -6,7 +6,7 @@ import { TEAMS, TEAM_BY_TRICODE } from '@/lib/teams';
 import { CAP, fmtShort } from '@/lib/cba';
 import { evaluateTrade, type Movements } from '@/lib/engine';
 import { encodeTrade, decodeTrade } from '@/lib/share';
-import { loadPro } from '@/lib/pro';
+import { loadPro, syncEntitlement } from '@/lib/pro';
 import { shareTradeCard } from '@/lib/shareCard';
 import { computeFinance } from '@/lib/finance';
 import { useLiveData, type DataMeta } from '@/lib/liveData';
@@ -172,6 +172,9 @@ export function TradeMachine({
   // Hydrate from a shared ?t= link on mount.
   useEffect(() => {
     setIsPro(loadPro());
+    // On iOS, ask StoreKit whether this Apple account owns Pro (covers
+    // reinstalls/new devices without an explicit Restore tap).
+    syncEntitlement().then((owned) => owned && setIsPro(true));
     const token = new URLSearchParams(window.location.search).get('t');
     if (token) {
       const st = decodeTrade(token);

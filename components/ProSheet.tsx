@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { PRO_FEATURES, PRO_PRICE, purchasePro, restorePurchases } from '@/lib/pro';
+import { useEffect, useState } from 'react';
+import { PRO_FEATURES, PRO_PRICE, getProPrice, purchasePro, restorePurchases } from '@/lib/pro';
 
 export function ProSheet({
   open,
@@ -13,20 +13,31 @@ export function ProSheet({
   onUnlocked: () => void;
 }) {
   const [busy, setBusy] = useState(false);
-  const [restoreMsg, setRestoreMsg] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [price, setPrice] = useState(PRO_PRICE);
+
+  useEffect(() => {
+    if (!open) return;
+    setMsg(null);
+    getProPrice().then(setPrice); // localized price on iOS; fallback label on web
+  }, [open]);
+
   if (!open) return null;
 
   const buy = async () => {
     setBusy(true);
+    setMsg(null);
     const ok = await purchasePro();
     setBusy(false);
     if (ok) { onUnlocked(); onClose(); }
+    else setMsg('Purchase didn’t complete — you haven’t been charged.');
   };
 
   const restore = async () => {
+    setMsg(null);
     const ok = await restorePurchases();
     if (ok) { onUnlocked(); onClose(); }
-    else setRestoreMsg('No previous purchase found.');
+    else setMsg('No previous purchase found for this Apple account.');
   };
 
   return (
@@ -64,12 +75,12 @@ export function ProSheet({
           disabled={busy}
           className="mt-6 w-full rounded-xl bg-accent py-3 font-condensed text-lg font-semibold uppercase tracking-wide text-black transition hover:brightness-110 disabled:opacity-50"
         >
-          {busy ? 'Unlocking…' : `Unlock Pro · ${PRO_PRICE}`}
+          {busy ? 'Unlocking…' : `Unlock Pro · ${price}`}
         </button>
         <button onClick={restore} className="mt-3 w-full text-center text-xs text-muted underline-offset-2 hover:text-text hover:underline">
           Restore purchases
         </button>
-        {restoreMsg && <div className="mt-2 text-center text-xs text-rose-300">{restoreMsg}</div>}
+        {msg && <div className="mt-2 text-center text-xs text-rose-300">{msg}</div>}
       </div>
     </div>
   );

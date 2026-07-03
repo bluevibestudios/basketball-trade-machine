@@ -1,0 +1,35 @@
+{
+  "identifier" : "C6CF9FCE-C193-441F-86AD-02A42FA6293A",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "9.99",
+      "familyShareable" : false,
+      "internalID" : "602CBCDD-8749-4C92-86C7-1490623B2514",
+      "localizations" : [
+        {
+          "description" : "Multi-team trades, draft picks, full CBA breakdowns, cap outlook, share graphics.",
+          "displayName" : "Pro Unlock",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "pro_unlock",
+      "referenceName" : "Pro Unlock",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA"
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}
